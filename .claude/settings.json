@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "claude-code-playbook@toy-crane": true
+  }
+}
