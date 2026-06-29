@@ -56,3 +56,52 @@ describe("useTodos 우선순위", () => {
     });
   });
 });
+
+describe("useTodos 마감일", () => {
+  it("addTodo에 전달한 마감일로 추가한다", () => {
+    const { result } = renderHook(() => useTodos());
+
+    act(() => {
+      result.current.addTodo("회의", "medium", "2026-07-01");
+    });
+
+    expect(result.current.todos[0]).toMatchObject({
+      text: "회의",
+      dueDate: "2026-07-01",
+    });
+  });
+
+  it("마감일을 생략하면 dueDate 없이 추가한다", () => {
+    const { result } = renderHook(() => useTodos());
+
+    act(() => {
+      result.current.addTodo("청소");
+    });
+
+    expect(result.current.todos[0].dueDate).toBeUndefined();
+  });
+
+  it("새로 추가한 Todo에는 생성 시각(createdAt)이 기록된다", () => {
+    const { result } = renderHook(() => useTodos());
+
+    act(() => {
+      result.current.addTodo("회의");
+    });
+
+    expect(typeof result.current.todos[0].createdAt).toBe("number");
+  });
+
+  it("createdAt이 없는 기존 데이터는 number로 보정해 로드한다", async () => {
+    localStorage.setItem(
+      "todos",
+      JSON.stringify([
+        { id: "1", text: "구버전 할 일", completed: false, priority: "medium" },
+      ])
+    );
+
+    const { result } = renderHook(() => useTodos());
+
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    expect(typeof result.current.todos[0].createdAt).toBe("number");
+  });
+});

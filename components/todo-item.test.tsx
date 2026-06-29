@@ -9,6 +9,7 @@ function makeTodo(overrides: Partial<Todo> = {}): Todo {
     text: "테스트 할 일",
     completed: false,
     priority: "medium",
+    createdAt: 0,
     ...overrides,
   };
 }
@@ -85,5 +86,31 @@ describe("TodoItem", () => {
     );
 
     expect(screen.getByText("테스트 할 일")).toHaveClass("line-through");
+  });
+
+  it("마감일이 있으면 마감일을 표시한다", () => {
+    render(
+      <TodoItem
+        todo={makeTodo({ dueDate: "2026-07-01" })}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("2026-07-01")).toBeInTheDocument();
+  });
+
+  it("마감일이 없으면 마감일을 표시하지 않는다", () => {
+    render(
+      <TodoItem
+        todo={makeTodo()}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByText("2026-07-01")).not.toBeInTheDocument();
   });
 });

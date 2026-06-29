@@ -84,6 +84,12 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
         </span>
       )}
 
+      {todo.dueDate && (
+        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+          {todo.dueDate}
+        </span>
+      )}
+
       <span
         className={cn(
           "shrink-0 rounded-full border px-2 py-0.5 text-[0.625rem] font-medium leading-none",

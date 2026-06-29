@@ -6,18 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface TodoInputProps {
-  onAdd: (text: string, priority: Priority) => void;
+  onAdd: (text: string, priority: Priority, dueDate?: string) => void;
 }
 
 export function TodoInput({ onAdd }: TodoInputProps) {
   const [value, setValue] = useState("");
   const [priority, setPriority] = useState<Priority>(DEFAULT_PRIORITY);
+  const [dueDate, setDueDate] = useState("");
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    onAdd(value, priority);
+    onAdd(value, priority, dueDate || undefined);
     setValue("");
     setPriority(DEFAULT_PRIORITY);
+    setDueDate("");
   }
 
   return (
@@ -27,6 +29,14 @@ export function TodoInput({ onAdd }: TodoInputProps) {
         onChange={(e) => setValue(e.target.value)}
         placeholder="할 일을 입력하고 Enter를 누르세요"
         aria-label="새 할 일"
+      />
+
+      <Input
+        type="date"
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+        aria-label="마감일"
+        className="w-auto"
       />
 
       <div role="radiogroup" aria-label="우선순위" className="flex gap-1">
@@ -47,6 +57,11 @@ export function TodoInput({ onAdd }: TodoInputProps) {
           );
         })}
       </div>
+
+      {/* 입력이 여러 개여도 Enter로 제출되도록 보이지 않는 제출 버튼을 둔다 */}
+      <button type="submit" className="sr-only">
+        추가
+      </button>
     </form>
   );
 }
