@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Todo } from "@/lib/types";
 import { TodoItem } from "@/components/todo-item";
@@ -140,5 +140,54 @@ describe("TodoItem", () => {
     expect(screen.queryByText("업무")).not.toBeInTheDocument();
     expect(screen.queryByText("개인")).not.toBeInTheDocument();
     expect(screen.queryByText("쇼핑")).not.toBeInTheDocument();
+  });
+});
+
+describe("TodoItem 편집 - IME 조합 중 Enter", () => {
+  it("IME 조합 확정용 Enter(isComposing=true)는 편집을 커밋하지 않는다", async () => {
+    const user = userEvent.setup();
+    const onEdit = vi.fn();
+    render(
+      <TodoItem
+        todo={makeTodo()}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={onEdit}
+      />
+    );
+
+    await user.dblClick(screen.getByText("테스트 할 일"));
+    const input = screen.getByRole("textbox", { name: "할 일 편집" });
+    fireEvent.change(input, { target: { value: "수정중" } });
+
+    // 한글 마지막 글자 조합을 확정하려고 누른 Enter (isComposing=true)
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+
+    expect(onEdit).not.toHaveBeenCalled();
+    // 여전히 편집 모드여야 한다
+    expect(
+      screen.getByRole("textbox", { name: "할 일 편집" })
+    ).toBeInTheDocument();
+  });
+
+  it("조합이 끝난 일반 Enter는 정상적으로 커밋한다", async () => {
+    const user = userEvent.setup();
+    const onEdit = vi.fn();
+    render(
+      <TodoItem
+        todo={makeTodo()}
+        onToggle={vi.fn()}
+        onDelete={vi.fn()}
+        onEdit={onEdit}
+      />
+    );
+
+    await user.dblClick(screen.getByText("테스트 할 일"));
+    const input = screen.getByRole("textbox", { name: "할 일 편집" });
+    fireEvent.change(input, { target: { value: "수정완료" } });
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onEdit).toHaveBeenCalledExactlyOnceWith("1", "수정완료");
   });
 });

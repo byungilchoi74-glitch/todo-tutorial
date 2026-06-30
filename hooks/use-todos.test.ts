@@ -127,3 +127,43 @@ describe("useTodos 카테고리", () => {
     expect(result.current.todos[0].category).toBeUndefined();
   });
 });
+
+describe("useTodos 손상 데이터 보호", () => {
+  it("파싱할 수 없는 저장값을 빈 배열로 덮어쓰지 않는다", async () => {
+    localStorage.setItem("todos", "{이건 JSON이 아님");
+
+    const { result } = renderHook(() => useTodos());
+
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    expect(result.current.todos).toEqual([]);
+    // 손상된 원본이 보존돼 복구 여지가 남아야 한다
+    expect(localStorage.getItem("todos")).toBe("{이건 JSON이 아님");
+  });
+
+  it("배열이 아닌 저장값도 덮어쓰지 않는다", async () => {
+    localStorage.setItem("todos", JSON.stringify({ x: 1 }));
+
+    const { result } = renderHook(() => useTodos());
+
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    expect(result.current.todos).toEqual([]);
+    expect(localStorage.getItem("todos")).toBe('{"x":1}');
+  });
+
+  it("손상 데이터 로드 후 새 항목을 추가하면 정상적으로 저장된다", async () => {
+    localStorage.setItem("todos", "{이건 JSON이 아님");
+
+    const { result } = renderHook(() => useTodos());
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+
+    act(() => {
+      result.current.addTodo("새 할 일");
+    });
+
+    await waitFor(() => {
+      const stored = JSON.parse(localStorage.getItem("todos") ?? "null");
+      expect(Array.isArray(stored)).toBe(true);
+      expect(stored[0]?.text).toBe("새 할 일");
+    });
+  });
+});

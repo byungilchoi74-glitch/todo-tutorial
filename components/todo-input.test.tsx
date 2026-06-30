@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TodoInput } from "@/components/todo-input";
 
@@ -184,5 +184,47 @@ describe("TodoInput 카테고리 선택", () => {
       "aria-checked",
       "true"
     );
+  });
+});
+
+describe("TodoInput 빈 입력 제출", () => {
+  it("공백만 입력해 제출하면 onAdd를 호출하지 않는다", async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<TodoInput onAdd={onAdd} />);
+
+    await user.type(
+      screen.getByRole("textbox", { name: "새 할 일" }),
+      "   {Enter}"
+    );
+
+    expect(onAdd).not.toHaveBeenCalled();
+  });
+
+  it("빈 입력으로 제출해도 선택한 우선순위·카테고리가 초기화되지 않는다", async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    render(<TodoInput onAdd={onAdd} />);
+
+    // 우선순위 '높음' + 카테고리 '업무'를 선택해 둔다
+    await user.click(screen.getByRole("radio", { name: "높음" }));
+    const categoryGroup = screen.getByRole("radiogroup", { name: "카테고리" });
+    await user.click(within(categoryGroup).getByRole("radio", { name: "업무" }));
+
+    // 텍스트 없이(공백) 제출
+    await user.type(
+      screen.getByRole("textbox", { name: "새 할 일" }),
+      "   {Enter}"
+    );
+
+    // 추가되지 않고, 선택값은 그대로 유지돼야 한다
+    expect(onAdd).not.toHaveBeenCalled();
+    expect(screen.getByRole("radio", { name: "높음" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
+    expect(
+      within(categoryGroup).getByRole("radio", { name: "업무" })
+    ).toHaveAttribute("aria-checked", "true");
   });
 });
