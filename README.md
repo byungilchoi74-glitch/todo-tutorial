@@ -2,6 +2,12 @@
 
 [Claude Code Playbook](https://docs.claude-hunt.com) 강의의 실습용 저장소입니다. Next.js 와 shadcn/ui 로 시작하는 작은 Todo 앱을 단계별로 발전시키며 Claude Code 사용법을 익힙니다.
 
+## 프로젝트 개요
+
+- Next.js(App Router) 기반의 할 일 관리(Todo) 앱입니다.
+- Server Components를 우선 사용하고 클라이언트 상태는 최소화하는 구조를 지향합니다.
+- 강의 진행에 맞춰 챕터별 브랜치로 기능을 단계적으로 추가합니다.
+
 ## 관련 링크
 
 - 강의 본문: https://docs.claude-hunt.com
